@@ -1,7 +1,8 @@
-CDBN
+RBM
 ====
 
-Convolutional Deep Belief Network
+Restricted Boltzmann Machine
 
-This is going to be an implementation of the paper "Convolutional Deep Belief Networks for Scalable Unsupervised Learning of Hierarchical Representations"
+This is going to be an implementation of the basic Restricted Boltzmann Machine training.
 
+I'm not gonna use a Contrastive Divergence for fast parameter learning instead use a basic gibbs sampling. 
