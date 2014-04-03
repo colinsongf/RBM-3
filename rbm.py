@@ -43,7 +43,7 @@ class RBM:
       h = np.asarray( np.random.rand( self.num_h ) ).reshape( self.num_h, 1) > p_h
       p_v = self.prob_v_given_h( h )
       v = np.asarray( np.random.rand( self.num_v ) ).reshape( self.num_v, 1) > p_v
-    
+
     for i in range(num_samples):
       p_h = self.prob_h_given_v( v )
       h = np.asarray( np.random.rand( self.num_h ) ).reshape( self.num_h, 1) > p_h
@@ -53,18 +53,20 @@ class RBM:
       
     return samples_v
 
+  # training_samples = V x N
   def expectation_of_data(self, training_samples):
     w = np.zeros( self.num_h * self.num_v ).reshape( self.num_h, self.num_v )
     p_h_avg = np.zeros( self.num_h ).reshape( self.num_h, 1 )
 
-    for i, v in enumerate( training_samples ):
+    for i, v in enumerate( training_samples.T ):
       v = v.reshape( self.num_v, 1)
       p_h = self.prob_h_given_v( v )
       p_h_avg += p_h
       w += np.dot( p_h, v.T )
 
-    return w / len( training_samples ), p_h_avg / len( training_samples )
+    return w / training_samples.shape[1], p_h_avg / training_samples.shape[1]
       
+  # gibbs_samples = V x N
   def expectation_of_model(self, gibbs_samples):
     w = np.zeros( self.num_h * self.num_v ).reshape( self.num_h, self.num_v )
     p_h_avg = np.zeros( self.num_h ).reshape( self.num_h, 1)
@@ -74,8 +76,8 @@ class RBM:
       p_h = self.prob_h_given_v( v )
       p_h_avg += p_h
       w += np.dot( p_h, v.T )
-      
-    return w / len( gibbs_samples ), p_h_avg / len( gibbs_samples )
+
+    return w / gibbs_samples.shape[1], p_h_avg / gibbs_samples.shape[1]
 
   # training_samples = V x N
   def train(self, iterations, training_samples):
@@ -84,16 +86,27 @@ class RBM:
     for i in range(iterations):
       print 'iteration============', i
       gibbs_samples = self.sample_v_using_gibbs_sampling( num_samples )
-      
       w_data_avg, p_h_data_avg = self.expectation_of_data( training_samples )
       w_model_avg, p_h_model_avg = self.expectation_of_model( gibbs_samples )
+      print p_h_data_avg 
 
       self.w += self.learning_rate * (w_data_avg - w_model_avg)
-      self.b += self.learning_rate * (np.mean( training_samples, axis=1 ) - np.mean( gibbs_samples, axis=1 )).reshape(self.num_v, 1)
+      self.b += self.learning_rate * ((np.mean( training_samples, axis=1 ) - np.mean( gibbs_samples, axis=1 )).reshape(self.num_v, 1))
       self.c += self.learning_rate * (p_h_data_avg - p_h_model_avg)
 
+
+  def test(self, v):
+    v = v.reshape( self.num_v, 1 )
+    p_h = self.prob_h_given_v( v )
+    h = np.asarray( np.random.rand( self.num_h ) ).reshape( self.num_h, 1) > p_h
+    return p_h, h
+    
 
 if __name__ == '__main__':
   rbm = RBM(num_v = 6, num_h = 2, learning_rate = 0.1)
   training_data = np.array([[1,1,1,0,0,0],[1,0,1,0,0,0],[1,1,1,0,0,0],[0,0,1,1,1,0],[0,0,1,1,0,0],[0,0,1,1,1,0]]).T
   rbm.train( 1000, training_data )
+
+  test_data = np.array([[0,0,0,1,1,0]]) 
+  p_h, h= rbm.test( test_data )
+  print p_h, h 
