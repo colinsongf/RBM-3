@@ -1,9 +1,9 @@
 RBM
 ====
 
-Restricted Boltzmann Machine
+Restricted Boltzmann Machines
 
-This is going to be an implementation of the basic Restricted Boltzmann Machine training.
+This is an implementation of the paper 'Training Restricted Boltzmann Machines: An Introduction' by Asja Fischer.
 
 I'm not gonna use a Contrastive Divergence for fast parameter learning.
 
