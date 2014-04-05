@@ -97,7 +97,7 @@ class RBM:
   def test(self, v):
     v = v.reshape( self.num_v, 1 )
     p_h = self.prob_h_given_v( v )
-    h = np.asarray( np.random.rand( self.num_h ) ).reshape( self.num_h, 1) > p_h
+    h = np.asarray( np.random.rand( self.num_h ) ).reshape( self.num_h, 1) < p_h
     return p_h, h
     
 
