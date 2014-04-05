@@ -86,13 +86,10 @@ class RBM:
     for i in range(iterations):
       print 'iteration============', i
       gibbs_samples = self.sample_v_using_gibbs_sampling( num_samples )
-      #print gibbs_samples
       w_data_avg, p_h_data_avg = self.expectation_of_data( training_samples )
       w_model_avg, p_h_model_avg = self.expectation_of_model( gibbs_samples )
-      #print p_h_data_avg 
 
       self.w += self.learning_rate * (w_data_avg - w_model_avg)
-      print self.w
       self.b += self.learning_rate * ((np.mean( training_samples, axis=1 ) - np.mean( gibbs_samples, axis=1 )).reshape(self.num_v, 1))
       self.c += self.learning_rate * (p_h_data_avg - p_h_model_avg)
 
