@@ -34,21 +34,21 @@ class RBM:
     return self.sigmoid( np.dot( self.w.T, h ) + self.b )
 
   # samples_v = num_v x num_samples
-  def sample_v_using_gibbs_sampling(self, num_samples, sample_after=1000):
+  def sample_v_using_gibbs_sampling(self, num_samples, sample_after=500):
     samples_v  = np.zeros( self.num_v * num_samples ).reshape( self.num_v, num_samples )
     v = np.random.choice(2, self.num_v).reshape( self.num_v, 1 )
 
     for i in range(sample_after):
       p_h = self.prob_h_given_v( v )
-      h = np.asarray( np.random.rand( self.num_h ) ).reshape( self.num_h, 1) > p_h
+      h = np.asarray( np.random.rand( self.num_h ) ).reshape( self.num_h, 1) < p_h
       p_v = self.prob_v_given_h( h )
-      v = np.asarray( np.random.rand( self.num_v ) ).reshape( self.num_v, 1) > p_v
+      v = np.asarray( np.random.rand( self.num_v ) ).reshape( self.num_v, 1) < p_v
 
     for i in range(num_samples):
       p_h = self.prob_h_given_v( v )
-      h = np.asarray( np.random.rand( self.num_h ) ).reshape( self.num_h, 1) > p_h
+      h = np.asarray( np.random.rand( self.num_h ) ).reshape( self.num_h, 1) < p_h
       p_v = self.prob_v_given_h( h )
-      v = np.asarray( np.random.rand( self.num_v ) ).reshape( self.num_v, 1) > p_v
+      v = np.asarray( np.random.rand( self.num_v ) ).reshape( self.num_v, 1) < p_v
       samples_v[:, i] = v[:,0]
       
     return samples_v
@@ -81,16 +81,18 @@ class RBM:
 
   # training_samples = V x N
   def train(self, iterations, training_samples):
-    num_samples = 100
+    num_samples = 50
 
     for i in range(iterations):
       print 'iteration============', i
       gibbs_samples = self.sample_v_using_gibbs_sampling( num_samples )
+      #print gibbs_samples
       w_data_avg, p_h_data_avg = self.expectation_of_data( training_samples )
       w_model_avg, p_h_model_avg = self.expectation_of_model( gibbs_samples )
-      print p_h_data_avg 
+      #print p_h_data_avg 
 
       self.w += self.learning_rate * (w_data_avg - w_model_avg)
+      print self.w
       self.b += self.learning_rate * ((np.mean( training_samples, axis=1 ) - np.mean( gibbs_samples, axis=1 )).reshape(self.num_v, 1))
       self.c += self.learning_rate * (p_h_data_avg - p_h_model_avg)
 
@@ -108,5 +110,9 @@ if __name__ == '__main__':
   rbm.train( 1000, training_data )
 
   test_data = np.array([[0,0,0,1,1,0]]) 
+  p_h, h= rbm.test( test_data )
+  print p_h, h 
+
+  test_data = np.array([[1,1,1,0,0,0]]) 
   p_h, h= rbm.test( test_data )
   print p_h, h 
