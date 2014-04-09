@@ -25,11 +25,13 @@ class RBM:
   def sigmoid(self, x):
     return 1.0 / (1.0 + np.exp(-x))
 
-  # v = num_v x 1
+  # v = V x 1
+  # eq.(21)
   def prob_h_given_v(self, v):
     return self.sigmoid( np.dot( self.w, v ) + self.c )
 
-  # h = num_h x 1
+  # h = H x 1
+  # eq.(22)
   def prob_v_given_h(self, h):
     return self.sigmoid( np.dot( self.w.T, h ) + self.b )
 
@@ -54,6 +56,7 @@ class RBM:
     return samples_v
 
   # training_samples = V x N
+  # first term of eq.(28)
   def expectation_of_data(self, training_samples):
     w = np.zeros( self.num_h * self.num_v ).reshape( self.num_h, self.num_v )
     p_h_avg = np.zeros( self.num_h ).reshape( self.num_h, 1 )
@@ -67,6 +70,7 @@ class RBM:
     return w / training_samples.shape[1], p_h_avg / training_samples.shape[1]
       
   # gibbs_samples = V x N
+  # second term of eq.(28)
   def expectation_of_model(self, gibbs_samples):
     w = np.zeros( self.num_h * self.num_v ).reshape( self.num_h, self.num_v )
     p_h_avg = np.zeros( self.num_h ).reshape( self.num_h, 1)
@@ -89,8 +93,11 @@ class RBM:
       w_data_avg, p_h_data_avg = self.expectation_of_data( training_samples )
       w_model_avg, p_h_model_avg = self.expectation_of_model( gibbs_samples )
 
+      # eq.(28)
       self.w += self.learning_rate * (w_data_avg - w_model_avg)
+      # eq.(30)
       self.b += self.learning_rate * ((np.mean( training_samples, axis=1 ) - np.mean( gibbs_samples, axis=1 )).reshape(self.num_v, 1))
+      # eq.(31)
       self.c += self.learning_rate * (p_h_data_avg - p_h_model_avg)
 
 
